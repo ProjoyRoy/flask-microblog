@@ -1,0 +1,33 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+  {% block content %}
+  <h1>Log In</h1>
+
+  <p><a href="{{ url_for('oauth_authorize', provider='facebook') }}">Login with Facebook</a></p>
+  <p><a href="{{ url_for('oauth_authorize', provider='twitter') }}">Login with Twitter</a></p>
+
+   
+  {% for message in form.email.errors %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+   
+  {% for message in form.password.errors %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+   
+  <form action="{{ url_for('login') }}" method=post>
+    {{ form.hidden_tag() }}
+     
+    {{ form.email.label }}
+    {{ form.email }}
+     
+    {{ form.password.label }}
+    {{ form.password }}
+
+    <p>{{ form.remember_me }} Remember Me
+     
+    {{ form.submit }}</p>
+  </form>
+      
+  {% endblock %}
