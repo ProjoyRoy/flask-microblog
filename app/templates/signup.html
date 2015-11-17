@@ -3,27 +3,26 @@
 {% block content %}
   <h2>Sign up</h2>
  
-  {% for message in form.name.errors %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-   
-  {% for message in form.email.errors %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-   
-  {% for message in form.password.errors %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-   
   <form action="{{ url_for('signup') }}" method=post>
     {{ form.hidden_tag() }}
-     
-        
+
+    {% for message in form.name.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+             
     {{ form.name.label }}
     {{ form.name }}
+
+    {% for message in form.email.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
      
     {{ form.email.label }}
     {{ form.email }}
+
+    {% for message in form.password.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
      
     {{ form.password.label }}
     {{ form.password }}

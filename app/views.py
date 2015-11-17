@@ -1,10 +1,11 @@
 from flask import render_template, flash, redirect, url_for, request, g
 from app import app, db, lm
-from .forms import LoginForm, SignupForm
+from .forms import LoginForm, SignupForm, EditForm
 from .models import User
 from flask.ext.login import login_user, logout_user,\
     current_user, login_required
 from oauth import OAuthSignIn
+from datetime import datetime
 
 
 @lm.user_loader
@@ -44,7 +45,7 @@ def login():
             if user and user.check_password(form.password.data):
                 # db.session.add(user)
                 # db.session.commit()
-                print (remember_me)
+                print(remember_me)
                 login_user(user, remember=remember_me)
                 return redirect(url_for('profile'))
         else:  # form contains invalid data
@@ -56,9 +57,10 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
-    # user = g.user
-    # db.session.add(user)
-    # db.session.commit()
+    if g.user.is_authenticated:
+        g.user.last_seen = datetime.utcnow()
+        db.session.add(g.user)
+        db.session.commit()
     logout_user()
     return redirect(url_for('index'))
 
@@ -86,7 +88,7 @@ def oauth_callback(provider):
         db.session.add(user)
         db.session.commit()
     login_user(user, True)
-    return redirect(url_for('index'))
+    return redirect(url_for('profile'))
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -128,3 +130,20 @@ def user(name):
         {'author': user, 'body': 'Test post #2'}
     ]
     return render_template('user.html', user=user, posts=posts)
+
+
+@app.route('/edit', methods=['GET', 'POST'])
+@login_required
+def edit():
+    form = EditForm()
+    if form.validate_on_submit():
+        g.user.name = form.name.data
+        g.user.about_me = form.about_me.data
+        db.session.add(g.user)
+        db.session.commit()
+        flash('Your profile has been updated.')
+        return redirect(url_for('profile'))
+    else:
+        form.name.data = g.user.name
+        form.about_me.data = g.user.about_me
+    return render_template('edit.html', form=form)

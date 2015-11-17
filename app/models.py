@@ -3,6 +3,8 @@ from config import SECRET_KEY, REMEMBER_COOKIE_DURATION
 from flask.ext.login import UserMixin
 from werkzeug import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
+from hashlib import md5
+
 
 token_serializer = URLSafeTimedSerializer(SECRET_KEY)
 
@@ -30,6 +32,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), nullable=True, unique=True)
     pwdhash = db.Column(db.String(64), nullable=True)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime)
 
     def __init__(self, name, email, password=None, social_id=None):
         self.name = name.title()
@@ -66,6 +70,10 @@ class User(UserMixin, db.Model):
     def get_auth_token(self):
         data = [str(self.id), self.pwdhash]
         return token_serializer.dumps(data)
+
+    def avatar(self, size):
+        return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % \
+                (md5(self.email.encode('utf-8')).hexdigest(), size)
 
     def __repr__(self):
         return '<User %r>' % (self.name)
