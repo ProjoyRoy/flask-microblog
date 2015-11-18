@@ -28,7 +28,7 @@ def load_token(token):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=True, unique=True)
-    name = db.Column(db.String(64), nullable=False)
+    name = db.Column(db.String(64), nullable=False, unique=True)
     email = db.Column(db.String(64), nullable=True, unique=True)
     pwdhash = db.Column(db.String(64), nullable=True)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -74,6 +74,18 @@ class User(UserMixin, db.Model):
     def avatar(self, size):
         return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % \
                 (md5(self.email.encode('utf-8')).hexdigest(), size)
+
+    @staticmethod
+    def pick_unique_name(name):
+        if User.query.filter_by(name=name).first() is None:
+            return name
+        version = 2
+        while True:
+            new_name = name + str(version)
+            if User.query.filter_by(name=new_name).first() is None:
+                break
+            version += 1
+        return new_name
 
     def __repr__(self):
         return '<User %r>' % (self.name)

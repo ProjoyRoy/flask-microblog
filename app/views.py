@@ -27,6 +27,17 @@ def index():
     return render_template('index.html')
 
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # return to index page if already logged in
@@ -82,9 +93,16 @@ def oauth_callback(provider):
     if social_id is None:
         flash('Authentication failed.')
         return redirect(url_for('index'))
-    user = User.query.filter_by(social_id=social_id).first()
+    if email is None:
+        flash('Authentication failed. User account requires valid email.\
+               Please sign up or log in with a different account')
+        return redirect(url_for('index'))
+    user = User.query.filter_by(email=email).first()
     if not user:
-        user = User(social_id=social_id, name=username, email=email)
+        if username is None or username == "":
+            username = email.split('@')[0]
+        this_username = User.pick_unique_name(username)
+        user = User(social_id=social_id, name=this_username, email=email)
         db.session.add(user)
         db.session.commit()
     login_user(user, True)
