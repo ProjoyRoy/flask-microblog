@@ -78,7 +78,7 @@ def logout():
 
 @app.route('/authorize/<provider>')
 def oauth_authorize(provider):
-    if not current_user.is_anonymous:
+    if not g.user.is_anonymous:
         return redirect(url_for('index'))
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize()
@@ -86,7 +86,7 @@ def oauth_authorize(provider):
 
 @app.route('/callback/<provider>')
 def oauth_callback(provider):
-    if not current_user.is_anonymous:
+    if not g.user.is_anonymous:
         return redirect(url_for('index'))
     oauth = OAuthSignIn.get_provider(provider)
     social_id, username, email = oauth.callback()
@@ -101,8 +101,7 @@ def oauth_callback(provider):
     if not user:
         if username is None or username == "":
             username = email.split('@')[0]
-        this_username = User.pick_unique_name(username)
-        user = User(social_id=social_id, name=this_username, email=email)
+        user = User(social_id=social_id, name=username, email=email)
         db.session.add(user)
         db.session.commit()
     login_user(user, True)

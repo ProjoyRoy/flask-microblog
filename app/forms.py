@@ -51,5 +51,7 @@ class SignupForm(Form):
 
 
 class EditForm(Form):
-    name = StringField('name', validators=[DataRequired()])
+    name = StringField('name')
+    email = StringField('email')
+    password = PasswordField('password', validaotors=[Length(min=6, max=30)])
     about_me = TextAreaField('about_me', validators=[Length(min=0, max=140)])
