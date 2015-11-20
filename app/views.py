@@ -56,7 +56,6 @@ def login():
             if user and user.check_password(form.password.data):
                 # db.session.add(user)
                 # db.session.commit()
-                print(remember_me)
                 login_user(user, remember=remember_me)
                 return redirect(url_for('profile'))
         else:  # form contains invalid data
@@ -119,11 +118,17 @@ def signup():
             if form.validate() == False:
                 return render_template('signup.html', form=form)
             else:
-                newuser = User(form.name.data, form.email.data,
-                               form.password.data)
-                db.session.add(newuser)
-                db.session.commit()
-                login_user(newuser, True)
+                user = User.query.filter_by(email=form.email.data).first()
+                if not user:
+                    newuser = User(form.name.data, form.email.data,
+                                   form.password.data)
+                    db.session.add(newuser)
+                    db.session.commit()
+                    login_user(newuser, True)
+                else:
+                    user.set_password(form.password.data)
+                    db.session.commit()
+                    login_user(user, True)
                 return redirect(url_for('profile'))
         elif request.method == 'GET':
             return render_template('signup.html', form=form)

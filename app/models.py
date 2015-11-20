@@ -17,7 +17,7 @@ def load_token(token):
     data = token_serializer.loads(token, max_age=max_age)
 
     # Find the User
-    user = data[0]
+    user = User.query.get(data[0])
 
     # Check pwdhash and return user or None
     if user and data[1] == user.pwdhash:
@@ -74,6 +74,12 @@ class User(UserMixin, db.Model):
     def avatar(self, size):
         return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % \
                 (md5(self.email.encode('utf-8')).hexdigest(), size)
+
+    def has_password(self):
+        if self.pwdhash is None:
+            return False
+        else:
+            return True
 
     def __repr__(self):
         return '<User %r>' % (self.name)
