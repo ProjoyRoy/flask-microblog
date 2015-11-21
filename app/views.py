@@ -42,7 +42,7 @@ def internal_error(error):
 def login():
     # return to index page if already logged in
     if g.user is not None and g.user.is_authenticated:
-        flash('Already logged in')
+        flash('Already logged in.')
         return redirect(url_for('index'))
     # if not logged in
     form = LoginForm()
@@ -152,14 +152,19 @@ def user(name):
 @login_required
 def edit():
     form = EditForm()
-    if form.validate_on_submit():
-        g.user.name = form.name.data
-        g.user.about_me = form.about_me.data
-        db.session.add(g.user)
-        db.session.commit()
-        flash('Your profile has been updated.')
-        return redirect(url_for('profile'))
-    else:
-        form.name.data = g.user.name
-        form.about_me.data = g.user.about_me
-    return render_template('edit.html', form=form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            if form.name.data is not None and form.name.data != '':
+                g.user.name = form.name.data
+            if form.about_me.data is not None and form.about_me.data != '':
+                g.user.about_me = form.about_me.data
+            if form.email.data is not None and form.email.data != '':
+                g.user.email = form.email.data
+            if form.password.data is not None and form.password.data != '':
+                g.user.set_password(form.password.data)
+            db.session.add(g.user)
+            db.session.commit()
+            flash('Your profile has been updated.')
+            return redirect(url_for('profile'))
+    elif request.method == 'GET':
+        return render_template('edit.html', form=form)

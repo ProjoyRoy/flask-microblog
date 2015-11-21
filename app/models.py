@@ -35,13 +35,15 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
 
-    def __init__(self, name, email, password=None, social_id=None):
+    def __init__(self, name, email, password=None, social_id=None,
+                 about_me=None):
         self.name = name.title()
         if email is not None:
             self.email = email.lower()
         if password is not None:
             self.set_password(password)
         self.social_id = social_id
+        self.about_me = about_me
 
     @property
     def is_authenticated(self):
