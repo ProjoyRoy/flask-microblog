@@ -47,7 +47,7 @@ def login():
     # if not logged in
     form = LoginForm()
     if request.method == 'POST':
-        if form.validate() == True:
+        if form.validate() is True:
             remember_me = False
             if 'remember_me' in request.form:
                 remember_me = True
@@ -94,7 +94,7 @@ def oauth_callback(provider):
         return redirect(url_for('index'))
     if email is None:
         flash('Authentication failed. User account requires valid email.\
-               Please sign up or log in with a different account')
+               Please sign up, or log in with a different account')
         return redirect(url_for('index'))
     user = User.query.filter_by(email=email).first()
     if not user:
@@ -115,20 +115,14 @@ def signup():
     else:
         form = SignupForm()
         if request.method == 'POST':
-            if form.validate() == False:
+            if form.validate() is False:
                 return render_template('signup.html', form=form)
             else:
-                user = User.query.filter_by(email=form.email.data).first()
-                if not user:
-                    newuser = User(form.name.data, form.email.data,
-                                   form.password.data)
-                    db.session.add(newuser)
-                    db.session.commit()
-                    login_user(newuser, True)
-                else:
-                    user.set_password(form.password.data)
-                    db.session.commit()
-                    login_user(user, True)
+                newuser = User(form.name.data, form.email.data,
+                               form.password.data)
+                db.session.add(newuser)
+                db.session.commit()
+                login_user(newuser, True)
                 return redirect(url_for('profile'))
         elif request.method == 'GET':
             return render_template('signup.html', form=form)

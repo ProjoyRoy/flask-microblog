@@ -29,7 +29,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=True, unique=True)
     name = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True, unique=True)
+    email = db.Column(db.String(64), nullable=False, unique=True)
     pwdhash = db.Column(db.String(64), nullable=True)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     about_me = db.Column(db.String(140))
@@ -73,7 +73,7 @@ class User(UserMixin, db.Model):
 
     def avatar(self, size):
         return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % \
-                (md5(self.email.encode('utf-8')).hexdigest(), size)
+            (md5(self.email.encode('utf-8')).hexdigest(), size)
 
     def has_password(self):
         if self.pwdhash is None:

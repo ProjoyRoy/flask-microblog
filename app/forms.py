@@ -1,6 +1,6 @@
 from flask.ext.wtf import Form
 from wtforms import StringField, BooleanField, PasswordField, SubmitField,\
-                    TextAreaField
+    TextAreaField
 from wtforms.validators import DataRequired, Length
 from .models import User
 
@@ -44,16 +44,10 @@ class SignupForm(Form):
             return False
         user = User.query.filter_by(email=self.email.data.lower()).first()
         if user:
-            if user.has_password():
-                self.email.errors.append("That email is already taken.")
-                return False
-            else:
-                if user.name != self.name:
-                    self.name.errors.append("This email already has a name \
-                                            associated with it.")
-                return True
-        else:
-            return True
+            self.email.errors.append("There is already an account with \
+                                          this email.")
+            return False
+        return True
 
 
 class EditForm(Form):
