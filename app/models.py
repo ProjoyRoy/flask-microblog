@@ -28,7 +28,7 @@ def load_token(token):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=True, unique=True)
-    username = db.Column(db.String(64), nullable=False)
+    username = db.Column(db.String(64), nullable=False, unique=True)
     email = db.Column(db.String(64), nullable=False, unique=True)
     pwdhash = db.Column(db.String(64), nullable=True)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -82,6 +82,25 @@ class User(UserMixin, db.Model):
             return False
         else:
             return True
+
+    def has_social_id(self):
+        if self.social_id is None:
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def create_unique_username(username):
+        username = username.title()
+        if User.query.filter_by(username=username).first() is None:
+            return username
+        version = 2
+        while True:
+            new_username = username + str(version)
+            if User.query.filter_by(username=new_username).first() is None:
+                break
+            version += 1
+        return new_username
 
     def __repr__(self):
         return '<User %r>' % (self.email)

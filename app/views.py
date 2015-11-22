@@ -100,9 +100,14 @@ def oauth_callback(provider):
     if not user:
         if username is None or username == "":
             username = email.split('@')[0]
+        username = User.create_unique_username(username)
         user = User(social_id=social_id, username=username, email=email)
         db.session.add(user)
         db.session.commit()
+    if user:
+        if user.social_id is None:
+            user.social_id = social_id
+            db.session.commit()
     login_user(user, True)
     return redirect(url_for('profile'))
 

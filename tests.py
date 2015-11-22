@@ -70,6 +70,12 @@ class UserTestClass(BaseTestClass):
 
 class UserTests(UserTestClass):
 
+    def test_create_unique_username(self):
+        u = User(username='neo', email='neo@one.com')
+        self.create_user(u)
+        username = User.create_unique_username('neo')
+        assert username != 'neo'
+
     def test_avatar(self):
         u = User(username='john', email='john@example.com')
         avatar = u.avatar(128)
