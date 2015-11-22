@@ -167,5 +167,7 @@ def edit():
             db.session.commit()
             flash('Your profile has been updated.')
             return redirect(url_for('profile'))
+        else:
+            return render_template('edit.html', form=form)
     elif request.method == 'GET':
         return render_template('edit.html', form=form)

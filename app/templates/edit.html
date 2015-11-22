@@ -7,18 +7,30 @@
       {{form.hidden_tag()}}
       <table>
           <tr>
-              <td>Your username:</td>
+              {% for message in form.username.errors %}
+              <div class="flash">{{ message }}</div>
+              {% endfor %}
+              <td>Your username:</td>              
               <td>{{ form.username(size=32) }}</td>
           </tr>
           <tr>
+              {% for message in form.email.errors %}
+              <div class="flash">{{ message }}</div>
+              {% endfor %}
               <td>Your email:</td>
               <td>{{ form.email(size=32) }}</td>
           </tr>
           <tr>
+              {% for message in form.password.errors %}
+              <div class="flash">{{ message }}</div>
+              {% endfor %}
               <td>Your password:</td>
               <td>{{ form.password(size=32) }}</td>
           </tr>
           <tr>
+              {% for message in form.about_me.errors %}
+              <div class="flash">{{ message }}</div>
+              {% endfor %}
               <td>About yourself:</td>
               <td>{{ form.about_me(cols=32, rows=4) }}</td>
           </tr>
