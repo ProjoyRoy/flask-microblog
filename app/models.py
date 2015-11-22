@@ -27,7 +27,6 @@ def load_token(token):
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    social_id = db.Column(db.String(64), nullable=True, unique=True)
     username = db.Column(db.String(64), nullable=False, unique=True)
     email = db.Column(db.String(64), nullable=False, unique=True)
     pwdhash = db.Column(db.String(64), nullable=True)
@@ -35,14 +34,12 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
 
-    def __init__(self, username, email, password=None, social_id=None,
-                 about_me=None):
+    def __init__(self, username, email, password=None, about_me=None):
         self.username = username.title()
         if email is not None:
             self.email = email.lower()
         if password is not None:
             self.set_password(password)
-        self.social_id = social_id
         self.about_me = about_me
 
     @property
@@ -79,12 +76,6 @@ class User(UserMixin, db.Model):
 
     def has_password(self):
         if self.pwdhash is None:
-            return False
-        else:
-            return True
-
-    def has_social_id(self):
-        if self.social_id is None:
             return False
         else:
             return True
