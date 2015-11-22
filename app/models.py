@@ -13,7 +13,7 @@ token_serializer = URLSafeTimedSerializer(SECRET_KEY)
 def load_token(token):
     max_age = REMEMBER_COOKIE_DURATION.total_seconds()
 
-    # Decrypt the Security Token, data = [username, hashpass]
+    # Decrypt the Security Token, data = [userid, hashpass]
     data = token_serializer.loads(token, max_age=max_age)
 
     # Find the User
@@ -28,16 +28,16 @@ def load_token(token):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=True, unique=True)
-    name = db.Column(db.String(64), nullable=False)
+    username = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(64), nullable=False, unique=True)
     pwdhash = db.Column(db.String(64), nullable=True)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
 
-    def __init__(self, name, email, password=None, social_id=None,
+    def __init__(self, username, email, password=None, social_id=None,
                  about_me=None):
-        self.name = name.title()
+        self.username = username.title()
         if email is not None:
             self.email = email.lower()
         if password is not None:
@@ -84,7 +84,7 @@ class User(UserMixin, db.Model):
             return True
 
     def __repr__(self):
-        return '<User %r>' % (self.name)
+        return '<User %r>' % (self.email)
 
 
 class Post(db.Model):

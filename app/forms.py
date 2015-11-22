@@ -30,7 +30,7 @@ class LoginForm(Form):
 
 
 class SignupForm(Form):
-    name = StringField('name', validators=[DataRequired()])
+    username = StringField('username', validators=[DataRequired()])
     email = StringField('email', validators=[DataRequired()])
     password = PasswordField('password', validators=[DataRequired(),
                                                      Length(min=6, max=30)])
@@ -51,7 +51,7 @@ class SignupForm(Form):
 
 
 class EditForm(Form):
-    name = StringField('name', validators=[Optional()])
+    username = StringField('username', validators=[Optional()])
     email = StringField('email', validators=[Optional()])
     password = PasswordField('password', validators=[Optional(),
                                                      Length(min=6, max=30)])

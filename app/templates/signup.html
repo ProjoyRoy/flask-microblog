@@ -6,12 +6,12 @@
   <form action="{{ url_for('signup') }}" method=post>
     {{ form.hidden_tag() }}
 
-    {% for message in form.name.errors %}
+    {% for message in form.username.errors %}
       <div class="flash">{{ message }}</div>
     {% endfor %}
              
-    {{ form.name.label }}
-    {{ form.name }}
+    {{ form.username.label }}
+    {{ form.username }}
 
     {% for message in form.email.errors %}
       <div class="flash">{{ message }}</div>

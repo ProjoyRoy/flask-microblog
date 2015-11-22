@@ -9,6 +9,8 @@ from app import app, db
 from app.models import User
 from flask.ext.login import login_user, logout_user, current_user
 
+grav_url = 'http://www.gravatar.com/avatar/d4c74594d841139328695756648b6bd6'
+
 
 class BaseTestClass(TestCase):
 
@@ -37,15 +39,9 @@ class UserTestClass(BaseTestClass):
         db.session.add(user)
         db.session.commit()
 
-    def test_avatar(self):
-        u = User(name='john', email='john@example.com')
-        avatar = u.avatar(128)
-        expected = 'http://www.gravatar.com/avatar/d4c74594d841139328695756648b6bd6'
-        assert avatar[0:len(expected)] == expected
-
-    def signup(self, name, email, password):
+    def signup(self, username, email, password):
         return self.client.post(url_for('signup'), data=dict(
-            name=name,
+            username=username,
             email=email,
             password=password
         ), follow_redirects=True)
@@ -59,9 +55,9 @@ class UserTestClass(BaseTestClass):
             password=password
         ), follow_redirects=True)
 
-    def edit(self, user, name, email, password, about_me):
+    def edit(self, user, username, email, password, about_me):
         return self.client.post(url_for('edit'), data=dict(
-            name=name,
+            username=username,
             email=email,
             password=password,
             about_me=about_me
@@ -71,13 +67,22 @@ class UserTestClass(BaseTestClass):
         logout_user()
         return self.client.get(url_for('logout'), follow_redirects=True)
 
+
+class UserTests(UserTestClass):
+
+    def test_avatar(self):
+        u = User(username='john', email='john@example.com')
+        avatar = u.avatar(128)
+        expected = grav_url
+        assert avatar[0:len(expected)] == expected
+
     def test_signup_path(self):
         assert current_user.is_anonymous
         rv = self.signup('Rambo', 'rambo@test.com', 'foobar')
         assert 'User: Rambo' in rv.data.decode("utf-8")
 
     def test_login_and_logout(self):
-        u = User(name='john', email='john@example.com', password='foobar')
+        u = User(username='john', email='john@example.com', password='foobar')
         self.create_user(u)
         assert u in db.session  # test that user was created in db
         assert current_user.is_anonymous  # test that no one is logged in
@@ -100,7 +105,7 @@ class UserTestClass(BaseTestClass):
 
         # while logged in, test that going to login or signup
         # takes user to index page
-        newuser = User(name='bonehead',
+        newuser = User(username='bonehead',
                        email='bone@head.com', password='foobar')
         rv = self.login(newuser, 'bone@head.com', 'foobar')
         assert 'Already logged in.' in rv.data.decode("utf-8")
@@ -116,7 +121,7 @@ class UserTestClass(BaseTestClass):
         assert current_user.is_anonymous
 
     def test_edit(self):
-        u = User(name='jim', email='jim@example.com', password='foobar',
+        u = User(username='jim', email='jim@example.com', password='foobar',
                  about_me='test')
         self.create_user(u)
         assert u in db.session
@@ -133,7 +138,7 @@ class UserTestClass(BaseTestClass):
         # checking empty edit
         rv = self.edit(u, '', '', '', '')
         assert 'Your profile has been updated' in rv.data.decode("utf-8")
-        assert current_user.name.lower() == 'jim'
+        assert current_user.username.lower() == 'jim'
         assert current_user.email == 'jim@example.com'
         assert current_user.check_password('foobar')
         assert current_user.about_me == 'test'
@@ -141,7 +146,7 @@ class UserTestClass(BaseTestClass):
         # checking successful edit
         rv = self.edit(u, 'james', 'james@example.com', 'pharos1', 'something')
         assert 'Your profile has been updated' in rv.data.decode("utf-8")
-        assert current_user.name.lower() == 'james'
+        assert current_user.username.lower() == 'james'
         assert current_user.email == 'james@example.com'
         assert current_user.check_password('pharos1')
         assert current_user.about_me == 'something'

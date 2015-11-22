@@ -100,7 +100,7 @@ def oauth_callback(provider):
     if not user:
         if username is None or username == "":
             username = email.split('@')[0]
-        user = User(social_id=social_id, name=username, email=email)
+        user = User(social_id=social_id, username=username, email=email)
         db.session.add(user)
         db.session.commit()
     login_user(user, True)
@@ -118,7 +118,7 @@ def signup():
             if form.validate() is False:
                 return render_template('signup.html', form=form)
             else:
-                newuser = User(form.name.data, form.email.data,
+                newuser = User(form.username.data, form.email.data,
                                form.password.data)
                 db.session.add(newuser)
                 db.session.commit()
@@ -131,15 +131,15 @@ def signup():
 @app.route('/profile')
 @login_required
 def profile():
-    return redirect(url_for('user', name=g.user.name))
+    return redirect(url_for('user', username=g.user.username))
 
 
-@app.route('/user/<name>')
+@app.route('/user/<username>')
 @login_required
-def user(name):
-    user = User.query.filter_by(name=name).first()
+def user(username):
+    user = User.query.filter_by(username=username).first()
     if user is None:
-        flash('User %s not found.' % name)
+        flash('User %s not found.' % username)
         return redirect(url_for('index'))
     posts = [
         {'author': user, 'body': 'Test post #1'},
@@ -154,8 +154,8 @@ def edit():
     form = EditForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            if form.name.data is not None and form.name.data != '':
-                g.user.name = form.name.data
+            if form.username.data is not None and form.username.data != '':
+                g.user.username = form.username.data
             if form.about_me.data is not None and form.about_me.data != '':
                 g.user.about_me = form.about_me.data
             if form.email.data is not None and form.email.data != '':
