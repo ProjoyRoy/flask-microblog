@@ -3,10 +3,11 @@ import os
 import unittest
 
 from unittest import TestCase
+from datetime import datetime, timedelta
 from flask import url_for
 from config import basedir
 from app import app, db
-from app.models import User
+from app.models import User, Post
 from flask.ext.login import login_user, logout_user, current_user
 
 grav_url = 'http://www.gravatar.com/avatar/d4c74594d841139328695756648b6bd6'
@@ -74,7 +75,7 @@ class UserTests(UserTestClass):
         u = User(username='neo', email='neo@one.com')
         self.create_user(u)
         username = User.create_unique_username('neo')
-        assert username != 'neo'
+        assert username != 'neo'  # test that user was created in db
 
     def test_avatar(self):
         u = User(username='john', email='john@example.com')
@@ -90,7 +91,7 @@ class UserTests(UserTestClass):
     def test_login_and_logout(self):
         u = User(username='john', email='john@example.com', password='foobar')
         self.create_user(u)
-        assert u in db.session  # test that user was created in db
+        assert u in db.session
         assert current_user.is_anonymous  # test that no one is logged in
 
         # test login with invalid email
@@ -157,6 +158,80 @@ class UserTests(UserTestClass):
         assert current_user.check_password('pharos1')
         assert current_user.about_me == 'something'
 
+    def test_follow(self):
+        u1 = User(username='dog', email='dog@god.com')
+        u2 = User(username='cat', email='cat@feedme.com')
+        self.create_user(u1)
+        self.create_user(u2)
+        # test that user 1 is not already following user 2
+        assert u1.unfollow(u2) is None
+        u = u1.follow(u2)  # make u1 follow u2 and store the returned user in u
+        self.create_user(u)
+        assert u1.follow(u2) is None
+        assert u1.is_following(u2)
+        assert u1.followed.count() == 1
+        assert u1.followed.first().username.lower() == 'cat'
+        assert u2.followers.count() == 1
+        assert u2.followers.first().username.lower() == 'dog'
+        u = u1.unfollow(u2)
+        assert u is not None
+        self.create_user(u)
+        assert not u1.is_following(u2)
+        assert u1.followed.count() == 0
+        assert u2.followers.count() == 0
+
+    def test_follow_posts(self):
+        # make four users
+        u1 = User(username='john', email='john@example.com')
+        u2 = User(username='susan', email='susan@example.com')
+        u3 = User(username='mary', email='mary@example.com')
+        u4 = User(username='david', email='david@example.com')
+        db.session.add(u1)
+        db.session.add(u2)
+        db.session.add(u3)
+        db.session.add(u4)
+        # make four posts
+        utcnow = datetime.utcnow()
+        p1 = Post(body="post from john", author=u1,
+                  timestamp=utcnow + timedelta(seconds=1))
+        p2 = Post(body="post from susan", author=u2,
+                  timestamp=utcnow + timedelta(seconds=2))
+        p3 = Post(body="post from mary", author=u3,
+                  timestamp=utcnow + timedelta(seconds=3))
+        p4 = Post(body="post from david", author=u4,
+                  timestamp=utcnow + timedelta(seconds=4))
+        db.session.add(p1)
+        db.session.add(p2)
+        db.session.add(p3)
+        db.session.add(p4)
+        db.session.commit()
+        # setup the followers
+        u1.follow(u1)  # john follows himself
+        u1.follow(u2)  # john follows susan
+        u1.follow(u4)  # john follows david
+        u2.follow(u2)  # susan follows herself
+        u2.follow(u3)  # susan follows mary
+        u3.follow(u3)  # mary follows herself
+        u3.follow(u4)  # mary follows david
+        u4.follow(u4)  # david follows himself
+        db.session.add(u1)
+        db.session.add(u2)
+        db.session.add(u3)
+        db.session.add(u4)
+        db.session.commit()
+        # check the followed posts of each user
+        f1 = u1.followed_posts().all()
+        f2 = u2.followed_posts().all()
+        f3 = u3.followed_posts().all()
+        f4 = u4.followed_posts().all()
+        assert len(f1) == 3
+        assert len(f2) == 2
+        assert len(f3) == 2
+        assert len(f4) == 1
+        assert f1 == [p4, p2, p1]
+        assert f2 == [p3, p2]
+        assert f3 == [p4, p3]
+        assert f4 == [p4]
 
 if __name__ == '__main__':
     unittest.main()
