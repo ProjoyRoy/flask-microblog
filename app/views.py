@@ -104,6 +104,9 @@ def oauth_callback(provider):
         user = User(username=username, email=email)
         db.session.add(user)
         db.session.commit()
+        # make the user follow him/herself
+        db.session.add(user.follow(user))
+        db.session.commit()
     login_user(user, True)
     return redirect(url_for('profile'))
 
@@ -122,6 +125,9 @@ def signup():
                 newuser = User(form.username.data, form.email.data,
                                form.password.data)
                 db.session.add(newuser)
+                db.session.commit()
+                # make the user follow him/herself
+                db.session.add(newuser.follow(newuser))
                 db.session.commit()
                 login_user(newuser, True)
                 return redirect(url_for('profile'))
@@ -171,3 +177,43 @@ def edit():
             return render_template('edit.html', form=form)
     elif request.method == 'GET':
         return render_template('edit.html', form=form)
+
+
+@app.route('/follow/<username>')
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('User %s not found.' % username)
+        return redirect(url_for('index'))
+    if user == g.user:
+        flash('You can\'t follow yourself!')
+        return redirect(url_for('user', username=username))
+    u = g.user.follow(user)
+    if u is None:
+        flash('Cannot follow ' + username + '.')
+        return redirect(url_for('user', username=username))
+    db.session.add(u)
+    db.session.commit()
+    flash('You are now following ' + username + '!')
+    return redirect(url_for('user', username=username))
+
+
+@app.route('/unfollow/<username>')
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('User %s not found.' % username)
+        return redirect(url_for('index'))
+    if user == g.user:
+        flash('You can\'t unfollow yourself!')
+        return redirect(url_for('user', username=username))
+    u = g.user.unfollow(user)
+    if u is None:
+        flash('Cannot unfollow ' + username + '.')
+        return redirect(url_for('user', username=username))
+    db.session.add(u)
+    db.session.commit()
+    flash('You have stopped following ' + username + '.')
+    return redirect(url_for('user', username=username))

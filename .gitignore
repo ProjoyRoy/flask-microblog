@@ -1,6 +1,7 @@
 *.pyc
 *.pyo
 app.db
+test.db
 search.db
 flask
 secrets.py
