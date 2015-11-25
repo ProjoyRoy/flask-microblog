@@ -24,15 +24,28 @@ def load_token(token):
         return user
     return None
 
+followers = db.Table('followers',
+                     db.Column(
+                         'follower_id', db.Integer, db.ForeignKey('user.id')),
+                     db.Column(
+                         'followed_id', db.Integer, db.ForeignKey('user.id'))
+                     )
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), nullable=False, unique=True)
-    email = db.Column(db.String(64), nullable=False, unique=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(64), index=True, nullable=False, unique=True)
     pwdhash = db.Column(db.String(64), nullable=True)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
+    followed = db.relationship('User',
+                               secondary=followers,
+                               primaryjoin=(followers.c.follower_id == id),
+                               secondaryjoin=(followers.c.followed_id == id),
+                               backref=db.backref('followers', lazy='dynamic'),
+                               lazy='dynamic')
 
     def __init__(self, username, email, password=None, about_me=None):
         self.username = username.title()
@@ -79,6 +92,26 @@ class User(UserMixin, db.Model):
             return False
         else:
             return True
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+            return self
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+            return self
+
+    def is_following(self, user):
+        return self.followed.filter(
+                    followers.c.followed_id == user.id).count() > 0
+
+    def followed_posts(self):
+        return Post.query.join(followers,
+                               (followers.c.followed_id == Post.user_id)) \
+                                .filter(followers.c.follower_id == self.id) \
+                                .order_by(Post.timestamp.desc())
 
     @staticmethod
     def create_unique_username(username):
