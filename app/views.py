@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request, g
 from app import app, db, lm
-from .forms import LoginForm, SignupForm, EditForm
-from .models import User
+from .forms import LoginForm, SignupForm, EditForm, PostForm
+from .models import User, Post
 from flask.ext.login import login_user, logout_user,\
     current_user, login_required
 from oauth import OAuthSignIn
@@ -21,10 +21,22 @@ def before_rquest():
     g.user = current_user
 
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, timestamp=datetime.utcnow(),
+                    author=g.user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now live!')
+        return redirect(url_for('index'))
+    posts = g.user.followed_posts().all()
+    return render_template('index.html',
+                           title='Home',
+                           form=form,
+                           posts=posts)
 
 
 @app.errorhandler(404)
@@ -148,10 +160,7 @@ def user(username):
     if user is None:
         flash('User %s not found.' % username)
         return redirect(url_for('index'))
-    posts = [
-        {'author': user, 'body': 'Test post #1'},
-        {'author': user, 'body': 'Test post #2'}
-    ]
+    posts = g.user.followed_posts().all()
     return render_template('user.html', user=user, posts=posts)
 
 

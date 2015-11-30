@@ -1,7 +1,31 @@
 {% extends "base.html" %}
 	{% block content %}
 		{% if current_user.is_authenticated %}
-			<h2>Hi, {{ current_user.username }}!</h2>
+			<h2>Hi, {{ g.user.username }}!</h2>
+			<form action="" method="post" name="post">
+				{{ form.hidden_tag() }}
+				<table>
+					<tr>
+						<td>Say something:</td>
+						<td>{{ form.post(size=30, maxlength=140) }}</td>
+						<td>
+						{% for error in form.post.errors %}
+						<span style="color: red;">[{{ error }}]</span><br>
+						{% endfor %}
+						</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><input type="submit" value="Post!"></td>
+						<td></td>
+					</tr>
+				</table>
+			</form>
+			{% for post in posts %}
+			<p>
+				{{ post.author.username }} says: <b>{{ post.body }}</b>
+			</p>
+			{% endfor %}
 			<p><a href="{{ url_for('logout') }}">Logout</a></p>
 		{% else %}
 			<h2><a href="{{ url_for('login') }}">Login</h2>
