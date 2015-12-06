@@ -32,7 +32,10 @@ def index():
         db.session.commit()
         flash('Your post is now live!')
         return redirect(url_for('index'))
-    posts = g.user.followed_posts().all()
+    if current_user.is_authenticated:
+        posts = g.user.followed_posts().all()
+    else:
+        posts = ""
     return render_template('index.html',
                            title='Home',
                            form=form,
