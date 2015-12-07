@@ -23,4 +23,5 @@ MAIL_PASSWORD = None
 ADMINS = ['you@example.com']
 
 # pagination
-POSTS_PER_PAGE = 3
+POSTS_PER_PAGE_INDEX = 3
+POSTS_PER_PAGE_PROFILE = 5

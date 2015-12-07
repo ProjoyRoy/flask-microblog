@@ -6,7 +6,7 @@ from flask.ext.login import login_user, logout_user,\
     current_user, login_required
 from oauth import OAuthSignIn
 from datetime import datetime
-from config import POSTS_PER_PAGE
+from config import POSTS_PER_PAGE_PROFILE, POSTS_PER_PAGE_INDEX
 
 
 @lm.user_loader
@@ -36,7 +36,7 @@ def index(page=1):
         return redirect(url_for('index'))
     if g.user.is_authenticated:
         posts = g.user.followed_posts().paginate(page,
-                                                 POSTS_PER_PAGE, False)
+                                                 POSTS_PER_PAGE_INDEX, False)
     else:
         posts = []
     return render_template('index.html',
@@ -160,13 +160,15 @@ def profile():
 
 
 @app.route('/user/<username>')
+@app.route('/user/<username>/<int:page>')
 @login_required
-def user(username):
+def user(username, page=1):
     user = User.query.filter_by(username=username).first()
     if user is None:
         flash('User %s not found.' % username)
         return redirect(url_for('index'))
-    posts = g.user.followed_posts().all()
+    posts = g.user.followed_posts().paginate(page,
+                                             POSTS_PER_PAGE_PROFILE, False)
     return render_template('user.html', user=user, posts=posts)
 
 
