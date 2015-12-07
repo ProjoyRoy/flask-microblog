@@ -25,3 +25,7 @@ ADMINS = ['you@example.com']
 # pagination
 POSTS_PER_PAGE_INDEX = 3
 POSTS_PER_PAGE_PROFILE = 5
+
+# WHOOSH database
+WHOOSH_BASE = os.path.join(basedir, 'search.db')
+MAX_SEARCH_RESULTS = 50

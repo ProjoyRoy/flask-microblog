@@ -1,9 +1,10 @@
-from app import db, lm
+from app import app, db, lm
 from config import SECRET_KEY, REMEMBER_COOKIE_DURATION
 from flask.ext.login import UserMixin
 from werkzeug import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
 from hashlib import md5
+import flask.ext.whooshalchemy as whooshalchemy
 
 
 token_serializer = URLSafeTimedSerializer(SECRET_KEY)
@@ -131,6 +132,8 @@ class User(UserMixin, db.Model):
 
 
 class Post(db.Model):
+    __searchable__ = ['body']
+
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime)
@@ -138,3 +141,6 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post %r>' % (self.body)
+
+
+whooshalchemy.whoosh_index(app, Post)
