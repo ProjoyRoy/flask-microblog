@@ -6,6 +6,7 @@ from flask.ext.login import login_user, logout_user,\
     current_user, login_required
 from oauth import OAuthSignIn
 from datetime import datetime
+from config import POSTS_PER_PAGE
 
 
 @lm.user_loader
@@ -23,7 +24,8 @@ def before_rquest():
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
-def index():
+@app.route('/index/<int:page>', methods=['GET', 'POST'])
+def index(page=1):
     form = PostForm()
     if form.validate_on_submit():
         post = Post(body=form.post.data, timestamp=datetime.utcnow(),
@@ -33,7 +35,8 @@ def index():
         flash('Your post is now live!')
         return redirect(url_for('index'))
     if g.user.is_authenticated:
-        posts = g.user.followed_posts().all()
+        posts = g.user.followed_posts().paginate(page,
+                                                 POSTS_PER_PAGE, False).items
     else:
         posts = []
     return render_template('index.html',
