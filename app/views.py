@@ -36,7 +36,7 @@ def index(page=1):
         return redirect(url_for('index'))
     if g.user.is_authenticated:
         posts = g.user.followed_posts().paginate(page,
-                                                 POSTS_PER_PAGE, False).items
+                                                 POSTS_PER_PAGE, False)
     else:
         posts = []
     return render_template('index.html',
