@@ -1,7 +1,9 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
-from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD
+from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME,\
+                 MAIL_PASSWORD
+from flask.ext.mail import Mail
 
 
 app = Flask(__name__)
@@ -10,6 +12,7 @@ db = SQLAlchemy(app)
 lm = LoginManager()
 lm.init_app(app)
 lm.login_view = 'login'
+mail = Mail(app)
 
 from app import views, models
 
@@ -28,8 +31,6 @@ if not app.debug:
     mail_handler.setLevel(logging.ERROR)
     app.logger.addHandler(mail_handler)
 
-if not app.debug:
-    import logging
     from logging.handlers import RotatingFileHandler
     file_handler = RotatingFileHandler(
         'tmp/microblog.log', 'a', 1 * 1024 * 1024, 10)
