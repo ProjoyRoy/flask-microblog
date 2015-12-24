@@ -8,6 +8,7 @@ from oauth import OAuthSignIn
 from datetime import datetime
 from config import POSTS_PER_PAGE_PROFILE, POSTS_PER_PAGE_INDEX,\
     MAX_SEARCH_RESULTS
+from .emails import follower_notification
 
 
 @lm.user_loader
@@ -219,6 +220,7 @@ def follow(username):
     db.session.add(u)
     db.session.commit()
     flash('You are now following ' + username + '!')
+    follower_notification(user, g.user)
     return redirect(url_for('user', username=username))
 
 
