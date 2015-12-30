@@ -22,7 +22,7 @@ MAIL_USERNAME = secrets.MAIL_USERNAME
 MAIL_PASSWORD = secrets.MAIL_PASSWORD
 
 # administrator list
-ADMINS = ['projoy@hotmail.com']
+ADMINS = secrets.ADMINS
 
 # pagination
 POSTS_PER_PAGE_INDEX = 3
