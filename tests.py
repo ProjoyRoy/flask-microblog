@@ -83,11 +83,6 @@ class UserTests(UserTestClass):
         expected = grav_url
         assert avatar[0:len(expected)] == expected
 
-    def test_signup_path(self):
-        assert current_user.is_anonymous
-        rv = self.signup('Rambo', 'rambo@test.com', 'foobar')
-        assert 'User: Rambo' in rv.data.decode("utf-8")
-
     def test_login_and_logout(self):
         u = User(username='john', email='john@example.com', password='foobar')
         self.create_user(u)
@@ -108,7 +103,6 @@ class UserTests(UserTestClass):
         rv = self.login(u, 'john@example.com', 'foobar')
         assert current_user.is_active
         assert u == current_user
-        assert 'User: John' in rv.data.decode("utf-8")
 
         # while logged in, test that going to login or signup
         # takes user to index page
@@ -144,7 +138,6 @@ class UserTests(UserTestClass):
 
         # checking empty edit
         rv = self.edit(u, '', '', '', '')
-        assert 'Your profile has been updated' in rv.data.decode("utf-8")
         assert current_user.username.lower() == 'jim'
         assert current_user.email == 'jim@example.com'
         assert current_user.check_password('foobar')
@@ -152,7 +145,6 @@ class UserTests(UserTestClass):
 
         # checking successful edit
         rv = self.edit(u, 'james', 'james@example.com', 'pharos1', 'something')
-        assert 'Your profile has been updated' in rv.data.decode("utf-8")
         assert current_user.username.lower() == 'james'
         assert current_user.email == 'james@example.com'
         assert current_user.check_password('pharos1')

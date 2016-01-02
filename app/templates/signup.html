@@ -1,33 +1,51 @@
 {% extends "base.html" %}
  
 {% block content %}
+  {% include 'flash.html' %}
+  <div class="well">
   <h2>Sign up</h2>
  
   <form action="{{ url_for('signup') }}" method=post>
     {{ form.hidden_tag() }}
 
-    {% for message in form.username.errors %}
-      <div class="flash">{{ message }}</div>
-    {% endfor %}
+    <div class="control-group{% if form.errors.username %} error{% endif %}">
+      {% for message in form.username.errors %}
+        <div class="alert alert-info">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
              
     {{ form.username.label }}
     {{ form.username }}
 
-    {% for message in form.email.errors %}
-      <div class="flash">{{ message }}</div>
-    {% endfor %}
+    <div class="control-group{% if form.errors.email %} error{% endif %}">
+      {% for message in form.email.errors %}
+        <div class="alert alert-info">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
      
     {{ form.email.label }}
     {{ form.email }}
 
-    {% for message in form.password.errors %}
-      <div class="flash">{{ message }}</div>
-    {% endfor %}
+    <div class="control-group{% if form.errors.password %} error{% endif %}">
+      {% for message in form.password.errors %}
+        <div class="alert alert-info">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
      
     {{ form.password.label }}
     {{ form.password }}
      
     {{ form.submit }}
   </form>
+  </div>
      
 {% endblock %}
