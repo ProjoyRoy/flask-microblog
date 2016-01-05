@@ -2,8 +2,9 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME,\
-                 MAIL_PASSWORD
+    MAIL_PASSWORD
 from flask.ext.mail import Mail
+from .momentjs import momentjs
 
 
 app = Flask(__name__)
@@ -13,6 +14,8 @@ lm = LoginManager()
 lm.init_app(app)
 lm.login_view = 'login'
 mail = Mail(app)
+app.jinja_env.globals['momentjs'] = momentjs
+
 
 from app import views, models
 
